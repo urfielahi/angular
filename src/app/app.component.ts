@@ -1,33 +1,44 @@
-import { Component } from '@angular/core';
+//import { Component } from '@angular/core';
+import {Component, ViewChild, ElementRef} from '@angular/core';
+import * as THREE from 'three';
 
 @Component({
   selector: 'app-root',
-  template: `
-  //Templating
-  <div>
-    //Property Binding
-    <h1>Employees Record</h1>
-    <ul *ngFor = " let emp of employees">
-      <h2>{{emp.sno}}</h2>
-      <li>{{emp.name}}</li>
-      <li>{{emp.gender}}</li>
-      <li>{{emp.location}}</li>
-    </ul>
-    //Event Binding
-    <button (click) = myClick($event)> Click Me</button>
-  </div>
-  `,
+  templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
   
-  employees = [
-    {sno: '1', name: 'John', gender: 'Male', location: 'USA'},
-    {sno: '2', name: 'Lara' , gender: "Female", location: "NY"},
-    {sno: '3', name: 'Lisa', gender: "Female", location: "NZ"}
-  ];
+  @ViewChild('rendererContainer') rendererContainer: ElementRef;
+  
+      renderer = new THREE.WebGLRenderer();
+      scene = null;
+      camera = null;
+      mesh = null;
 
-  myClick(event){
-    console.log(event);
-  }
+      constructor() {
+        this.scene = new THREE.Scene();
+
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+        this.camera.position.z = 1000;
+
+        const geometry = new THREE.BoxGeometry(200, 200, 200);
+        const material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true});
+        this.mesh = new THREE.Mesh(geometry, material);
+
+        this.scene.add(this.mesh);
+    }
+
+      ngAfterViewInit() {
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
+        this.animate();
+      }
+
+      animate() {
+        window.requestAnimationFrame(() => this.animate());
+        this.mesh.rotation.x += 0.01;
+        this.mesh.rotation.y += 0.02;
+        this.renderer.render(this.scene, this.camera);
+      }
 }
